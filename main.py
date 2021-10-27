@@ -2,18 +2,32 @@ import cv2
 import numpy as np
 import os
 
-#resize size
-dim=(1024,768)
+
 
 #read images
 readLeft=cv2.imread('lowHom1.png',cv2.IMREAD_COLOR)
 readRight=cv2.imread('lowHom2.png',cv2.IMREAD_COLOR)
 
-#for resizing if wanted.
-Left=cv2.resize(readLeft,dim,interpolation = cv2.INTER_AREA)
-Right=cv2.resize(readRight,dim,interpolation = cv2.INTER_AREA)
+grayImgLeft = cv2.cvtColor(readLeft,cv2.COLOR_BGR2GRAY)
+grayImgRight = cv2.cvtColor(readRight,cv2.COLOR_BGR2GRAY)
+
+sift = cv2.xfeatures2d.SIFT_create()
+kp1, des1 = sift.detectAndCompute(grayImgLeft,None)
+kp2, des2 = sift.detectAndCompute(grayImgRight,None)
+
+match = cv2.BFMatcher()
+matches = match.knnMatch(des1,des2,k=2)
+
+good = []
+for m,n in matches:
+    if m.distance < 0.03*n.distance:
+        good.append(m)
+
+
 
 drawParams = dict(matchColor = (0,255,0), singlePointColor = None, flags = 2)
+
+image3 = cv2.drawMatches(readLeft,kp1,readRight,kp2,good,None,**drawParams)
 
 images=[]
 images.append(readLeft)
@@ -29,6 +43,7 @@ if ret==cv2.STITCHER_OK:
     cv2.imshow('left',readLeft)
     cv2.imshow('right',readRight)
     cv2.imshow('Panorama',pano)
+    cv2.imshow('key', image3)
     cv2.waitKey()
     cv2.destroyAllWindows()
 else:
