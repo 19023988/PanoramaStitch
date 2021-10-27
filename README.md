@@ -1,3 +1,3 @@
 # PanoramaStitch
 
-use pip install opencv-contrib-python to enable SIFT
+use pip <b>install opencv-contrib-python</b> to enable SIFT
